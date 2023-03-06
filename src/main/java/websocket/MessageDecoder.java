@@ -32,3 +32,14 @@ public class MessageDecoder implements Decoder.Text<Message>{
         // Close resources
     }
 }
+/*
+* {
+*   "from": "name",
+*   "to": "name"
+*   "content": {
+*     "message_theme": "text",
+*     "message_content": "text"
+*     }
+* }
+*
+* */

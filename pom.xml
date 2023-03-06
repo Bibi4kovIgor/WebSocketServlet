@@ -39,11 +39,15 @@
     </dependencies>
 
     <build>
+        <finalName>webSocket</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
+                <configuration>
+                    <outputDirectory>${project.basedir}/binary</outputDirectory>
+                </configuration>
             </plugin>
         </plugins>
     </build>
