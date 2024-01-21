@@ -1,27 +1,29 @@
 package websocket;
 
 import com.google.gson.Gson;
-import jakarta.websocket.EncodeException;
 import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
 import model.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MessageEncoder implements Encoder.Text<Message> {
-    private static Gson gson = new Gson();
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageDecoder.class);
+
+    private static final Gson gson = new Gson();
 
     @Override
-    public String encode(Message message) throws EncodeException {
-        String json = gson.toJson(message);
-        return json;
+    public String encode(Message message) {
+        return gson.toJson(message);
     }
 
     @Override
     public void init(EndpointConfig endpointConfig) {
-        // Custom initialization logic
+        LOGGER.info("Message encoder servlet was initialized");
     }
 
     @Override
     public void destroy() {
-        // Close resources
+        LOGGER.info("Message encoder servlet was destroyed");
     }
 }

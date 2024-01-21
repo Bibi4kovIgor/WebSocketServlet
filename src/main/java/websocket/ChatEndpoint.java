@@ -4,20 +4,24 @@ import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import model.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+
 @ServerEndpoint(value = "/chat/{username}", decoders = MessageDecoder.class, encoders = MessageEncoder.class)
 public class ChatEndpoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatEndpoint.class);
     private Session session;
     private static final Set<ChatEndpoint> chatEndpoints = new CopyOnWriteArraySet<>();
-    private static HashMap<String, String> users = new HashMap<>();
+    private static final HashMap<String, String> users = new HashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("username") String username) throws IOException, EncodeException {
+    public void onOpen(Session session, @PathParam("username") String username) {
 
         this.session = session;
         chatEndpoints.add(this);
@@ -30,13 +34,13 @@ public class ChatEndpoint {
     }
 
     @OnMessage
-    public void onMessage(Session session, Message message) throws IOException, EncodeException {
+    public void onMessage(Session session, Message message) {
         message.setFrom(users.get(session.getId()));
         broadcast(message);
     }
 
     @OnClose
-    public void onClose(Session session) throws IOException, EncodeException {
+    public void onClose(Session session) {
         chatEndpoints.remove(this);
         Message message = new Message();
         message.setFrom(users.get(session.getId()));
@@ -46,20 +50,23 @@ public class ChatEndpoint {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-        // Do error handling here
+        String errorMessage =
+                String.format("Messaging error: session (%s) exception text (%s)", session, throwable.getMessage());
+        LOGGER.error(errorMessage);
+        throw new RuntimeException(errorMessage);
     }
 
-    private static void broadcast(Message message) throws IOException, EncodeException {
-        chatEndpoints.forEach(endpoint -> {
+    private static void broadcast(Message message) {
+        for (ChatEndpoint endpoint : chatEndpoints) {
             synchronized (endpoint) {
                 try {
                     endpoint.session.getBasicRemote()
                             .sendObject(message);
                 } catch (IOException | EncodeException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage());
                 }
             }
-        });
+        }
     }
 
 }

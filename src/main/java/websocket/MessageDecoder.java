@@ -4,17 +4,18 @@ import com.google.gson.Gson;
 import jakarta.websocket.Decoder;
 import jakarta.websocket.EndpointConfig;
 import model.Message;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class MessageDecoder implements Decoder.Text<Message>{
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageDecoder.class);
 
     private static final Gson gson = new Gson();
 
     @Override
     public Message decode(String s) {
-        Message message = gson.fromJson(s, Message.class);
-        return message;
+        return gson.fromJson(s, Message.class);
     }
 
     @Override
@@ -24,15 +25,16 @@ public class MessageDecoder implements Decoder.Text<Message>{
 
     @Override
     public void init(EndpointConfig endpointConfig) {
-        // Custom initialization logic
+        LOGGER.info("Message decoder servlet was initialized");
     }
 
     @Override
     public void destroy() {
-        // Close resources
+        LOGGER.info("Message decoder servlet was destroyed");
     }
 }
 /*
+* Example of message,encoded with JSON
 * {
 *   "from": "name",
 *   "to": "name"
