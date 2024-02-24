@@ -2,15 +2,24 @@ FROM tomcat:jre21
 
 ARG SCRIPT=deploy_on_tomcat.sh
 
+
+ARG WORKDIR_PATH=/app
+WORKDIR ${WORKDIR_PATH}
+
+ENV CATALINA_PORT_NUMBER=8091
+EXPOSE ${CATALINA_PORT_NUMBER}
+
 ENV APP_NAME webSocket.war
-ENV LAUNCH_SCRIPT_PATH /app/deploy_on_tomcat.sh
-RUN chmod +x ${LAUNCH_SCRIPT_PATH}
+ENV TOMCAT_NAME catalina.sh
 
-WORKDIR /app
+ENV LAUNCH_SCRIPT_PATH ${WORKDIR_PATH}/deploy_on_tomcat.sh
 
-COPY ${APP_NAME} /app
+COPY ${APP_NAME} ${WORKDIR_PATH}
 COPY ${SCRIPT} ${LAUNCH_SCRIPT_PATH}
 
-RUN echo $APP_NAME && ls -ah
+RUN chmod +x ${LAUNCH_SCRIPT_PATH}
 
-CMD ${LAUNCH_SCRIPT_PATH} -f webSocket.war --username=admin --password=admin --endpoint=/chat --port=8091 -uc
+RUN   apt update \
+      && apt install net-tools
+
+ENTRYPOINT ${LAUNCH_SCRIPT_PATH} -f ${APP_NAME} --username=admin --password=admin --endpoint=/chat -d -p ${pwd}
